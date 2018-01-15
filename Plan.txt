@@ -19,7 +19,7 @@ Level two introduces the idea of power-ups, which are, unlike, WORM, activated u
 
  = = = = = =
  s = = u = c
- = c = = s =
+ = c = = s =	
  = c = = u =
  = = = = = =
  
