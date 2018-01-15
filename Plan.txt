@@ -1,0 +1,48 @@
+1. I found the design of "worms" to be interesting because, having never really played Breakout, I had imagined it to be much simpler in that breaking a block automatically granted you a power-up. In actuality, the game does a drop system, which forces the player to decide between risking going for the power-up and saving the ball. While this interesting enough alone, a concept I found intriguing but unnecessary is the addition of paddle speed boosts. In my opinion, part of the challenge is being able to accurately and precisely control your mouse. This principle forms the basis of many games, including CS:GO. However, adding paddle speed-ups, or in other words an initially handicapped paddle, seems like an artificial attempt to make the game more difficult and something that detracts from the skill that is accurate hand-eye-mouse coordination. In context of this assignment however (using arrow keys as inputs), speed makes sense as a bonus power up. 
+2. I'm basing my design based off of a regular break out game, but with two players (at opposite ends) and two balls. The first level I plan to have it as a normal, standard, no special blocks Breakout. The block formation will be something as follows (one '=' is one brick, one '-' is the paddle)
+
+        -   
+
+= = = = = =
+= = = = = =
+= = = = = =
+= = = = = =
+= = = = = =
+
+    -      
+
+The objective of the game is simple; be the person to have the highest score. For both players, only the wall behind each player (as is standard Breakout) is permeable. The two win conditions are A) score the most points by the time the game ends (no blocks present) or B) the opponent drops the ball behind his wall. For sake of score, each block has an assigned point value, and breaking a block adds its value to your score. There is also a scoreboard.
+
+Level two introduces the idea of power-ups, which are, unlike, WORM, activated upon breaking said block. No catching mechanism is present. Powerups do not have bonus point values (the powerup is an advantage enough). Such a level would look as follows (letters represent special powerups):
+
+ -         
+
+ = = = = = =
+ s = = u = c
+ = c = = s =
+ = c = = u =
+ = = = = = =
+ 
+        -   
+
+Level three introduces a new idea, the idea of a God Block (my "something extra"). The God Block is able to withstand any and all hits until every non-god-block in the game is cleared. Once that happens, the God block becomes breakable. The same win conditions apply, with God block having extremely high value. Level three, then, would look something like this (X denotes God Block):
+
+      -     
+ = = = = = =
+ s = = u = c
+ = c = X s =
+ = c = = u =
+ = = = = = =
+   -       
+
+3. Block Type 1: regular block, takes 1 hit to break
+Block Type 2: sturdy block, takes a variable number of hits to break
+Block Type 3: God Block
+Block Type 4: Power-up block, instant-consume power-up block. Power-ups last indefinitely until round ends. 
+
+4. Power-up 1: Explosive block, clearing this block clears all blocks around it, including (potentially, depending on level design), the God Block. 
+Power-up 2: Faster paddle, simply makes paddle faster. 
+Power-up 3: Inverts the opponent's paddle's direction. 
+
+5. Cheat Codes: R resets levels, Q quits game, I turns on invincible mode (cannot die, guarded wall becomes solid) 
+6. My something extra is that God Block design. It's substantial because it adds a new high priority objective. The design will be such that it's point value will almost certainly win you the game. The God block can also be protected by a bunch of sturdy blocks or other blocks. It can also play an integral role in level design.
