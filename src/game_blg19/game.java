@@ -8,10 +8,13 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -22,6 +25,11 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.*;
 
+/**
+ * @author blg19
+ * bunch of constants to help with scalability
+ *
+ */
 public class game extends Application {
     public static final String TITLE = "Two-Player Breakout";
     public static final int SIZE = 800;
@@ -30,7 +38,8 @@ public class game extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final Paint BACKGROUND = Color.CADETBLUE;
     public static final Paint HIGHLIGHT = Color.WHITE;    
-    public static final String BOUNCER_IMAGE = "ball.gif";
+    public static final String P1END = "P1Win.png";
+    public static final String P2END = "P2Win.png";
     public int BOUNCER_SPEED = 30;
     public static final Paint MOVER_COLOR = Color.PLUM;
     public static final Paint MOVER_COLOR2 = Color.AQUA;
@@ -57,11 +66,11 @@ public class game extends Application {
     public static final int EBPOINT = 200;
     public static final int XPADDING = 300;
     public static final int YPADDING = 35;
+    
     private Text Score_Text1;
     private int score1;
     private Text Score_Text2;
     private int score2;
-
     private Scene myScene;
     private Rectangle myMover1, myMover2;
     private Ball myBouncer1, myBouncer2;
@@ -76,11 +85,15 @@ public class game extends Application {
     private Button btn4;
     private Stage thestage;
     
-    /*
-    Unimplemented
-    private ImageView FILE1;
-    private ImageView FILE2;
-     */   
+    private Rectangle EndScreen1 = new Rectangle(0, 0, SIZE, SIZE);
+    private Rectangle EndScreen2 = new Rectangle(0, 0, SIZE, SIZE);
+    
+    /**
+     * @author blg19
+     * Initialized Splash screen
+     *
+     */
+    
     @Override
     public void start (Stage stage) throws Exception {
         splash = setupSplash(SIZE, SIZE, BACKGROUND);
@@ -90,6 +103,11 @@ public class game extends Application {
         thestage.show();
     }
     
+    /**
+     * @author blg19
+     * As the name implies, this method creates a splash screen. 
+     *
+     */
     private Scene setupSplash (int width, int height, Paint background) throws Exception {
     	VBox splash = new VBox ();
         splash.setPadding(new Insets(10, 50, 50, 50));
@@ -116,7 +134,11 @@ public class game extends Application {
         Scene scene = new Scene(splash);
         return scene;
       }
-    
+    /**
+     * @author blg19
+     * Helper Method for the splash screen, this method sets up the behavior upon map selection and loads the playing field
+     *
+     */
     public void ButtonClicked(ActionEvent e) throws Exception {
     	if (e.getSource()==btn1) {LevelFile = "Resources/Level1.txt";}
     	else if (e.getSource()==btn2) {LevelFile = "Resources/Level2.txt";}
@@ -135,9 +157,14 @@ public class game extends Application {
         animation.play();    	
     }
 
+    /**
+     * @author blg19
+     * provides framework to generate playing field
+     *
+     */
     private Scene setupGame (int width, int height, Paint background) throws Exception {
         Scene scene = new Scene(root, width, height, background);
-        myBouncer1 = new Ball(BALL_XSTART, BALL_YSTART, BALL_RADIUS, -BALL_XVEL, BALL_YVEL, BALL_INITIAL_POINTS);
+        myBouncer1 = new Ball(BALL_XSTART, BALL_YSTART, BALL_RADIUS, -BALL_XVEL-20, BALL_YVEL, BALL_INITIAL_POINTS);
         myBouncer1.setFill(MOVER_COLOR2);
         myBouncer2 = new Ball(width - BALL_XSTART, BALL_YSTART, BALL_RADIUS, BALL_XVEL, BALL_YVEL, BALL_INITIAL_POINTS);
         myBouncer2.setFill(MOVER_COLOR);
@@ -174,6 +201,11 @@ public class game extends Application {
         return scene;
     }
 
+    /**
+     * @author blg19
+     * calculates the next "frame" of the game. Includes calls to collision computation and calculation
+     *
+     */
     private void step (double elapsedTime) {
           myBouncer1.setCenterX((myBouncer1.getCenterX() + myBouncer1.xVel * elapsedTime));
           myBouncer1.setCenterY((myBouncer1.getCenterY() + myBouncer1.yVel * elapsedTime));
@@ -188,6 +220,10 @@ public class game extends Application {
         	myBouncer2.yVel = -1 * myBouncer2.yVel;}
         if (myBouncer2.getCenterX() - BALL_RADIUS <= 0) {
         	myBouncer2.xVel = -1 * myBouncer2.xVel;}
+        
+        if (myBouncer1.getCenterX() < 0) {p2wins();}
+        if (myBouncer2.getCenterX() > SIZE) {p1wins();}
+        
         Shape intersect = Shape.intersect(myMover1, myBouncer1);
         if (intersect.getBoundsInLocal().getWidth() != -1) {
             myBouncer1.xVel = -1*myBouncer1.xVel;}
@@ -199,9 +235,15 @@ public class game extends Application {
         else {
             myMover2.setFill(MOVER_COLOR);}
         BrickCollide(myBouncer1);
-        BrickCollide(myBouncer2);       
+        BrickCollide(myBouncer2);
+        
+        if (root.getChildren().size() < 7) {endgame();}
     }
-    
+    /**
+     * @author blg19
+     * Interface between users and game, provides controls and cheat codes
+     *
+     */
     private void handleKeyInput (KeyCode code) {
         if (code == KeyCode.S) {myMover1.setY(myMover1.getY() + MOVER_SPEED);}
         else if (code == KeyCode.W) {myMover1.setY(myMover1.getY() - MOVER_SPEED);}
@@ -215,8 +257,15 @@ public class game extends Application {
         	myMover2.setY(0);}        
         if (code == KeyCode.DIGIT1) {myBouncer1.score = myBouncer1.score + 1000;}
         if (code == KeyCode.DIGIT2) {myBouncer2.score = myBouncer2.score + 1000;}
-    }
-    
+        if (code == KeyCode.P) {myBouncer2.xVel = 0; myBouncer2.yVel = 0;}
+        if (code == KeyCode.O) {myBouncer2.xVel = BALL_XVEL; myBouncer2.yVel = BALL_YVEL;}
+        if (code == KeyCode.C) {myBouncer1.xVel = -myBouncer1.xVel; myBouncer1.yVel = -myBouncer1.yVel;}
+    }    
+    /**
+     * @author blg19
+     * Determines hitboxes and recomputes ball direction and speed. Calls another method to update scoree and to edit the visual appearance of game
+     *
+     */
     private void BrickCollide(Ball B) {
     	for (int i = 0; i < map.length; i++) {
     		for (int j = 0; j < map.length; j++) {
@@ -237,14 +286,22 @@ public class game extends Application {
     		}
     	}
     }
-   
+    /**
+     * @author blg19
+     * pretty clear, updates the score board
+     *
+     */
     public void updatescore() {
 		score1 = myBouncer1.score;
 		score2 = myBouncer2.score;
 		Score_Text1.setText("Score: " + score1);
 		Score_Text2.setText("Score: " + score2);
     }
-    
+    /**
+     * @author blg19
+     * Determines brick interaction depending on which brick made contact. Also handles some brick removal
+     *
+     */
     public void brickhit(StdBlock S, Ball B, int i, int j) {
     	switch (S.ID) {
     		case 1:
@@ -288,7 +345,11 @@ public class game extends Application {
     		break;
     	}
     }
-    
+    /**
+     * @author blg19
+     * takes information about a block and creates said block from the input matrix
+     *
+     */
     public StdBlock GenerateBlock(int Identity, int xpos, int ypos) {
     	switch (Identity) {
     		case 1: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 1, false, true);
@@ -301,6 +362,12 @@ public class game extends Application {
     	}
     	 return new StdBlock((BRICK_L * xpos + 10 * (xpos + 1)), (BRICK_W * ypos + 5 * (ypos + 1)), BRICK_L, BRICK_W, STDPOINT, 0, false, false);
     }
+    
+    /**
+     * @author blg19
+     * parses input file into a matrix, currently only designed to handle square matrices
+     *
+     */
     
     public static int[][] parsefile(String filename) throws Exception {
     	int[][] level = null;
@@ -318,34 +385,69 @@ public class game extends Application {
     	}
     	return level;
     }
-
-/* Code under testing, not part of game    
+    
+    /**
+     * @author blg19
+     * stop ball movement
+     *
+     */
+    public void stop() {
+    	myBouncer1.xVel = 0;
+    	myBouncer1.yVel = 0;
+    	myBouncer2.xVel = 0;
+    	myBouncer2.yVel = 0;
+    }
+    /**
+     * @author blg19
+     * loads the images used for end screen
+     *      *
+     */
+    public void CreateEnd() {
+        Image image1 = new Image(getClass().getClassLoader().getResourceAsStream(P1END));
+		EndScreen1.setFill(new ImagePattern(image1));
+        Image image2 = new Image(getClass().getClassLoader().getResourceAsStream(P2END));
+		EndScreen2.setFill(new ImagePattern(image2));
+    }
+    /**
+     * @author blg19
+     * win condition calculated in case of no blocks left
+     *
+     */
     public void endgame() {
+    	CreateEnd();
     	if (myBouncer1.score > myBouncer2.score) {
-            Image image = new Image(getClass().getClassLoader().getResourceAsStream("P1Win.png"));
-    		EndScreen.setFill(new ImagePattern(image));
+    		root.getChildren().add(EndScreen1);
     	}
     	else {
-            Image image = new Image(getClass().getClassLoader().getResourceAsStream("P2Win.png"));
-    		EndScreen.setFill(new ImagePattern(image));
-    	}
-    	root.getChildren().add(EndScreen);
-    		
+    		root.getChildren().add(EndScreen2);
+    	} 
+    	stop();
     }
-    
+    /**
+     * @author blg19
+     * win condition for player 1
+     *
+     */
     public void p1wins() {
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream("P1Win.png"));
-		EndScreen.setFill(new ImagePattern(image));
-		root.getChildren().add(EndScreen);
+    	CreateEnd();
+    	if (!root.getChildren().contains(EndScreen1))
+    	root.getChildren().add(EndScreen1);
+		stop();
     }
     
+    /**
+     * @author blg19
+     * win condition for player 2
+     *
+     */
     public void p2wins() {
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream("P2Win.png"));
-		EndScreen.setFill(new ImagePattern(image));
-		root.getChildren().add(EndScreen);
+    	CreateEnd();
+    	if (!root.getChildren().contains(EndScreen2))
+		root.getChildren().add(EndScreen2);
+		stop();
     }
     
-*/
+
     public static void main (String[] args) {
         launch(args);
     }
