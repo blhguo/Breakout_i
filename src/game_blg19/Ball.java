@@ -1,7 +1,13 @@
 package game_blg19;
 
+
+
 import javafx.scene.shape.Circle;
 
+/**
+ * @author blg19
+ *This class extends the javafx class "circle", adding parameters like x-velocity, y-velocity, and score, as well as methods to alter these parameters
+ */
 public class Ball extends Circle {
 	public int xVel;
 	public int yVel;

@@ -1,20 +1,11 @@
 package game_blg19;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
+/**
+ * @author blg19
+ * This class extends Rectangle to include parameters such as velocity and methods to alter the parameters. In this case xVel actually represents yVelocity
+ */
 public class Paddle extends Rectangle{
     public int xVel;
     //public int yVel;

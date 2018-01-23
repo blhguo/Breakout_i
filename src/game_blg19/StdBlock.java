@@ -3,6 +3,12 @@ package game_blg19;
 import javafx.scene.shape.Rectangle;
 
 
+
+/**
+ * @author blg19
+ * This class extends the rectangle class to include parameters such as boolean "god", ID, point value, and Exists, as well as methods to retrieve and alter these parameters. 
+ *  
+ */
 public class StdBlock extends Rectangle {
 	public boolean God;
 	
@@ -22,9 +28,5 @@ public class StdBlock extends Rectangle {
 	
 	public void destroy() {
 		this.Exists = false;
-	}
-	
-	public int getVal() {
-		return this.pVal;
 	}
 }

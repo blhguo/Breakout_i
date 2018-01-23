@@ -9,7 +9,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
@@ -27,11 +26,13 @@ import java.io.*;
 
 /**
  * @author blg19
+ * 
+ * This code forms the backbone of the BRICKOUT game.
  * bunch of constants to help with scalability
  *
  */
 public class game extends Application {
-    public static final String TITLE = "Two-Player Breakout";
+    public static final String TITLE = "BRICKOUT";
     public static final int SIZE = 800;
     public static final int FRAMES_PER_SECOND = 60;
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
@@ -45,7 +46,6 @@ public class game extends Application {
     public static final Paint MOVER_COLOR2 = Color.AQUA;
     public static final int MOVER_LENGTH = 100;
     public static final int MOVER_HEIGHT = 15;
-    public int MOVER_SPEED = 50;
     public static final Paint GROWER_COLOR = Color.BISQUE;
     public static final double GROWER_RATE = 1.1;
     public static final int GROWER_SIZE = 50;
@@ -66,13 +66,24 @@ public class game extends Application {
     public static final int EBPOINT = 200;
     public static final int XPADDING = 300;
     public static final int YPADDING = 35;
+    public static final int SPLASHPAD1 = 10;
+    public static final int SPLASHPAD2 = 50;
+    public static final int PADDLE_OFFSET = 10;
+    public static final int SCORE_XLOC = 100;
+    public static final int SCORE_YLOC = 100;
+    public static final int QUANT_OBJ = 7;
+    public static final int BONUSPOINT = 1000;
+    public static final int BRICK_X_SPACING = 20;
+    public static final int BRICK_Y_SPACING = 15;
+    public static final int WIDTHOFMATRIX = 7;
+    public static final int ACCEL = 50;
     
     private Text Score_Text1;
     private int score1;
     private Text Score_Text2;
     private int score2;
     private Scene myScene;
-    private Rectangle myMover1, myMover2;
+    private Paddle myMover1, myMover2;
     private Ball myBouncer1, myBouncer2;
     private StdBlock BrickBuffer;
     private Group root = new Group();
@@ -84,7 +95,7 @@ public class game extends Application {
     private Button btn3;
     private Button btn4;
     private Stage thestage;
-    
+    private int MOVER_SPEED = 50;
     private Rectangle EndScreen1 = new Rectangle(0, 0, SIZE, SIZE);
     private Rectangle EndScreen2 = new Rectangle(0, 0, SIZE, SIZE);
     
@@ -110,11 +121,12 @@ public class game extends Application {
      */
     private Scene setupSplash (int width, int height, Paint background) throws Exception {
     	VBox splash = new VBox ();
-        splash.setPadding(new Insets(10, 50, 50, 50));
-        splash.setSpacing(10);
+        splash.setPadding(new Insets(SPLASHPAD1, SPLASHPAD2, SPLASHPAD2, SPLASHPAD2));
+        splash.setSpacing(SPLASHPAD1);
         Label lbl = new Label("BRICKOUT: \n The newest, hippest, swaggiest, poppiest, all-the-kids-are-playing-it-iest game of all time! Following the classic vaporwave aesthetic, the game is simple. \n -Different Blocks have different values. Breaking a block earns you that block's points. \n -Some blocks even have special effects! However, to make it interesting, you can't tell which blocks have what effects. \n -The loser is whoever loses their ball first, or whoever scores the fewest points by the time all the blocks are cleared. \n -You only have one life! Spend it wisely (or as the kids say, YOLO) \n -The game only recognizes one input at a time! That means you'd better mash your buttons faster than your opponent! \n -Map 4 is experimental! Blocks that can earn you points are protected! Sneak past their defenses! \n -Cheat Codes: \n 	Q: Quit game \n	 I: Make both players invincible \n	1: Next block Blue Team breaks is worth 1000 extra points \n	2: Next block Red Team breaks is worth 1000 extra points \n-pls dont do anything outside of the intended usecase code is fragile");
         lbl.setFont(Font.font("Amble CN", FontWeight.BOLD, 24));
         splash.getChildren().add(lbl);
+        //this is kind of duplicate code, but because I need to initialize four unique instances of "button", it seems necessary, especially with the different names and actions of each button
         btn1 = new Button();
         btn1.setText("Map 1");
         btn1.setOnAction(e -> {try {ButtonClicked(e);} catch (Exception e4) {e4.printStackTrace();}});
@@ -168,9 +180,9 @@ public class game extends Application {
         myBouncer1.setFill(MOVER_COLOR2);
         myBouncer2 = new Ball(width - BALL_XSTART, BALL_YSTART, BALL_RADIUS, BALL_XVEL, BALL_YVEL, BALL_INITIAL_POINTS);
         myBouncer2.setFill(MOVER_COLOR);
-        myMover1 = new Paddle(10, height/2, MOVER_HEIGHT, MOVER_LENGTH, MOVER_SPEED);
+        myMover1 = new Paddle(PADDLE_OFFSET, height/2, MOVER_HEIGHT, MOVER_LENGTH, MOVER_SPEED);
         myMover1.setFill(MOVER_COLOR2);
-        myMover2 = new Paddle(width - 10 - MOVER_HEIGHT, height/2, MOVER_HEIGHT, MOVER_LENGTH, MOVER_SPEED);
+        myMover2 = new Paddle(width - PADDLE_OFFSET - MOVER_HEIGHT, height/2, MOVER_HEIGHT, MOVER_LENGTH, MOVER_SPEED);
         myMover2.setFill(MOVER_COLOR);
         int[][] LevelSet = parsefile(LevelFile);
         map = new StdBlock[LevelSet.length][LevelSet.length];
@@ -193,8 +205,8 @@ public class game extends Application {
         score1 = myBouncer1.score;
         score2 = myBouncer2.score;
         
-        Score_Text1 = new Text(100, 100, "Score: " + score1);
-        Score_Text2 = new Text(width - 100, 100, "Score: " + score2);
+        Score_Text1 = new Text(SCORE_XLOC, SCORE_YLOC, "Score: " + score1);
+        Score_Text2 = new Text(width - SCORE_XLOC, SCORE_YLOC, "Score: " + score2);
         root.getChildren().add(Score_Text1);
         root.getChildren().add(Score_Text2);
         scene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
@@ -237,7 +249,7 @@ public class game extends Application {
         BrickCollide(myBouncer1);
         BrickCollide(myBouncer2);
         
-        if (root.getChildren().size() < 7) {endgame();}
+        if (root.getChildren().size() < QUANT_OBJ) {endgame();}
     }
     /**
      * @author blg19
@@ -251,12 +263,12 @@ public class game extends Application {
         else if (code == KeyCode.UP) {myMover2.setY(myMover2.getY() - MOVER_SPEED);}
         if (code == KeyCode.Q) {System.exit(0);}
         if (code == KeyCode.I) {
-        	myMover1.setHeight(1000);
-        	myMover2.setHeight(1000);
+        	myMover1.setHeight(SIZE);
+        	myMover2.setHeight(SIZE);
         	myMover1.setY(0);
         	myMover2.setY(0);}        
-        if (code == KeyCode.DIGIT1) {myBouncer1.score = myBouncer1.score + 1000;}
-        if (code == KeyCode.DIGIT2) {myBouncer2.score = myBouncer2.score + 1000;}
+        if (code == KeyCode.DIGIT1) {myBouncer1.score = myBouncer1.score + BONUSPOINT;}
+        if (code == KeyCode.DIGIT2) {myBouncer2.score = myBouncer2.score + BONUSPOINT;}
         if (code == KeyCode.P) {myBouncer2.xVel = 0; myBouncer2.yVel = 0;}
         if (code == KeyCode.O) {myBouncer2.xVel = BALL_XVEL; myBouncer2.yVel = BALL_YVEL;}
         if (code == KeyCode.C) {myBouncer1.xVel = -myBouncer1.xVel; myBouncer1.yVel = -myBouncer1.yVel;}
@@ -271,6 +283,7 @@ public class game extends Application {
     		for (int j = 0; j < map.length; j++) {
     			Shape intersect1 = Shape.intersect(map[i][j], B);
     			if (intersect1.getBoundsInLocal().getWidth() != -1) {
+    				//complicated boolean expression that first checks if impact should occur, then, if necessary, where the ball is in relation to the brick. Can be broken into separate booleans, but that would take more lines and honestly these booleans aren't that complicated you just need to draw them out to understand them
     				if ((map[i][j].Exists) && (B.getCenterY() > map[i][j].getY() && B.getCenterY() < map[i][j].getY() + BRICK_L) && ((B.getCenterX() > map[i][j].getX() - BALL_RADIUS) || (B.getCenterX() < (map[i][j].getX() + BRICK_W + BALL_RADIUS)))) {
     					B.xVel = -1*B.xVel;
     					brickhit(map[i][j], B, i, j);
@@ -314,7 +327,8 @@ public class game extends Application {
     			B.score = B.score + STDPOINT;
     			break;
     		case 3:
-    			MOVER_SPEED = MOVER_SPEED * 2; 
+    			myMover1.ChangeVel(ACCEL);
+    			myMover2.ChangeVel(ACCEL);
     			root.getChildren().remove(S); 
     			B.score = B.score + PSPOINT;
     			break;
@@ -325,12 +339,14 @@ public class game extends Application {
     			B.score = B.score + BSPOINT;
     			break;
     		case 5:
-    			MOVER_SPEED = -1 * MOVER_SPEED; 
+//    			MOVER_SPEED = -1 * MOVER_SPEED; 
+    			myMover1.ChangeDir();
+    			myMover2.ChangeDir();
     			root.getChildren().remove(S); 
     			B.score = B.score + IPPOINT;
     			break;
     		case 6:
-    			if (root.getChildren().size() == 7) {
+    			if (root.getChildren().size() == QUANT_OBJ) {
     				root.getChildren().remove(S);
     				map[i][j].destroy();
     				B.score = B.score + GBPOINT;}
@@ -338,9 +354,9 @@ public class game extends Application {
     		case 7:
     		root.getChildren().remove(S);
     		B.score = B.score + EBPOINT;
-    		if ((j < 6) && (root.getChildren().contains(map[i][j+1]))) {root.getChildren().remove(map[i][j+1]); map[i][j+1].destroy();}
+    		if ((j < (WIDTHOFMATRIX-1)) && (root.getChildren().contains(map[i][j+1]))) {root.getChildren().remove(map[i][j+1]); map[i][j+1].destroy();}
     		if ((j > 0) && (root.getChildren().contains(map[i][j-1]))) {root.getChildren().remove(map[i][j-1]); map[i][j-1].destroy();}
-    		if ((i < 6) && (root.getChildren().contains(map[i+1][j]))) {root.getChildren().remove(map[i+1][j]); map[i+1][j].destroy();}
+    		if ((i < (WIDTHOFMATRIX-1)) && (root.getChildren().contains(map[i+1][j]))) {root.getChildren().remove(map[i+1][j]); map[i+1][j].destroy();}
     		if ((i < 0) && (root.getChildren().contains(map[i-1][j]))) {root.getChildren().remove(map[i-1][j]); map[i-1][j].destroy();}
     		break;
     	}
@@ -352,15 +368,15 @@ public class game extends Application {
      */
     public StdBlock GenerateBlock(int Identity, int xpos, int ypos) {
     	switch (Identity) {
-    		case 1: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 1, false, true);
-    		case 2: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 2, false, true);
-    		case 3: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 3, false, true);
-    		case 4: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 4, false, true);
-    		case 5: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 5, false, true);
-    		case 6: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 6, true, true);
-    		case 7: return new StdBlock((BRICK_W * xpos + 20 * (xpos + 1) + XPADDING), (BRICK_L * ypos + 15 * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 7, false, true);
+    		case 1: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 1, false, true);
+    		case 2: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 2, false, true);
+    		case 3: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 3, false, true);
+    		case 4: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 4, false, true);
+    		case 5: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 5, false, true);
+    		case 6: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 6, true, true);
+    		case 7: return new StdBlock((BRICK_W * xpos + BRICK_X_SPACING * (xpos + 1) + XPADDING), (BRICK_L * ypos + BRICK_Y_SPACING * (ypos + 1) + YPADDING), BRICK_W, BRICK_L, STDPOINT, 7, false, true);
     	}
-    	 return new StdBlock((BRICK_L * xpos + 10 * (xpos + 1)), (BRICK_W * ypos + 5 * (ypos + 1)), BRICK_L, BRICK_W, STDPOINT, 0, false, false);
+    	 return new StdBlock((BRICK_L * xpos + BRICK_X_SPACING * (xpos + 1)), (BRICK_W * ypos + BRICK_Y_SPACING * (ypos + 1)), BRICK_L, BRICK_W, STDPOINT, 0, false, false);
     }
     
     /**
