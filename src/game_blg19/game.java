@@ -27,7 +27,10 @@ import java.io.*;
 /**
  * @author blg19
  * 
- * This code forms the backbone of the BRICKOUT game.
+ * This code forms the backbone of the BRICKOUT game. It contains calls to every needed method and structure and object needed to simulate playing the two player game Brickout. 
+ * It assumes that the input matrix is a square, 7x7 matrix. Changes to this assumption will require alternative image scaling and edits to parsefile. It depends on many classes, specifically StdBlock, Ball and Paddle, as it's entire functionality surrounds manipulating these objects. 
+ * Usage: Just click run, which will begin "main" and launch the game. From there, click on a button representing the particular map you want to play. 
+ * Controls: W/UP to move paddle up, S/DOWN to move paddle down, "1"/"2" add points to a player, P pause player 2's ball, O move P2's ball towards the top right, C to reverse the direction of P1's ball, I to make both paddles extremely large, Q to quit game.
  * bunch of constants to help with scalability
  *
  */
@@ -102,7 +105,9 @@ public class game extends Application {
     /**
      * @author blg19
      * Initialized Splash screen
-     *
+     * adds splash screen to the stage and draws stage. Assumes that the inputs to setupSplash are valid. 
+     * @param stage the window everything is being added to
+     * @return No return value
      */
     
     @Override
@@ -117,7 +122,12 @@ public class game extends Application {
     /**
      * @author blg19
      * As the name implies, this method creates a splash screen. 
-     *
+     * Assumes that only four maps are needed/possible (though this aspect can be rather easily changed), and assumes that ButtonClicked is a valid method
+     * @param width: Width of screen
+     * @param height: height of screen
+     * @param background: color to fill background 
+     * Takes in three parameters representing the scene that setupSplash is trying to generate and return.
+     * @return Scene text and buttons added to it
      */
     private Scene setupSplash (int width, int height, Paint background) throws Exception {
     	VBox splash = new VBox ();
@@ -149,7 +159,10 @@ public class game extends Application {
     /**
      * @author blg19
      * Helper Method for the splash screen, this method sets up the behavior upon map selection and loads the playing field
-     *
+     * Assumes that the filepaths specified exist, and that the inputs to setupGame are valid. Also assumes setupGame is defined
+     * @param ActionEvent the click of the mouse representing selection of a map
+     * Takes in a single parameter (ActionEvent) and based on where the source of that event is, picks a filepath to load.
+     * @return none
      */
     public void ButtonClicked(ActionEvent e) throws Exception {
     	if (e.getSource()==btn1) {LevelFile = "Resources/Level1.txt";}
@@ -172,7 +185,12 @@ public class game extends Application {
     /**
      * @author blg19
      * provides framework to generate playing field
-     *
+     * Assumes that Ball, Scene, paddle, and brick are all defined, and that GenerateBlock is a valid method. 
+     * @param width width of screen
+     * @param height height of screen
+     * @param background background color of screen
+     * Takes in three parameters to build the scene and colorize it, and each of the methods and initializations called use global constants or variables
+     * @return Scene Returns a scene representing the playing field.
      */
     private Scene setupGame (int width, int height, Paint background) throws Exception {
         Scene scene = new Scene(root, width, height, background);
@@ -216,7 +234,10 @@ public class game extends Application {
     /**
      * @author blg19
      * calculates the next "frame" of the game. Includes calls to collision computation and calculation
-     *
+     * Assumes that paddle and balls have been defined, as well as bricks and that the BrickCollide method is defined and valid
+     * @param elapsedTime time between frames
+     * Takes in a double representing the time between frames.
+     * @return No return value
      */
     private void step (double elapsedTime) {
           myBouncer1.setCenterX((myBouncer1.getCenterX() + myBouncer1.xVel * elapsedTime));
@@ -254,7 +275,9 @@ public class game extends Application {
     /**
      * @author blg19
      * Interface between users and game, provides controls and cheat codes
-     *
+     * Assumes that paddles and balls have been initialized. 
+     * @param code the input detected by the keyboard
+     * @return No return value 
      */
     private void handleKeyInput (KeyCode code) {
         if (code == KeyCode.S) {myMover1.setY(myMover1.getY() + MOVER_SPEED);}
@@ -275,8 +298,9 @@ public class game extends Application {
     }    
     /**
      * @author blg19
-     * Determines hitboxes and recomputes ball direction and speed. Calls another method to update scoree and to edit the visual appearance of game
-     *
+     * Determines hitboxes and recomputes ball direction and speed. Calls another method to update score and to edit the visual appearance of game. assumes bricks have been generated and stored properly, and that ball has been initialized
+     * @param B ball representing the ball we are checking collisions for. 
+     * @return No return value
      */
     private void BrickCollide(Ball B) {
     	for (int i = 0; i < map.length; i++) {
@@ -301,7 +325,9 @@ public class game extends Application {
     }
     /**
      * @author blg19
-     * pretty clear, updates the score board
+     * pretty clear, updates the score board. Assume score is kept by each ball and that balls and scoreboards have been initialized
+     * @param None
+     * @return None
      *
      */
     public void updatescore() {
@@ -313,7 +339,11 @@ public class game extends Application {
     /**
      * @author blg19
      * Determines brick interaction depending on which brick made contact. Also handles some brick removal
-     *
+     * Assume S, B, i, j are all valid instantiations of its variables, and that S.Exists is true. 
+     * @param S the block that has made contact with the ball
+     * @param B the ball making contact with the brick
+     * @param i, j ints representing the location of S in the 2D array
+     * @return No return value
      */
     public void brickhit(StdBlock S, Ball B, int i, int j) {
     	switch (S.ID) {
@@ -364,7 +394,11 @@ public class game extends Application {
     /**
      * @author blg19
      * takes information about a block and creates said block from the input matrix
-     *
+     * Assumes that the math within each initialization is valid and generates blocks properly
+     * @param Identity what kind of block to create
+     * @param xpos the row location of the block in the matrix
+     * @param ypos the col location of the block in the matrix
+     * @return StdBlock returns a block
      */
     public StdBlock GenerateBlock(int Identity, int xpos, int ypos) {
     	switch (Identity) {
@@ -382,7 +416,9 @@ public class game extends Application {
     /**
      * @author blg19
      * parses input file into a matrix, currently only designed to handle square matrices
-     *
+     * Assumes that the file is a properly formatted square matrix and that the filepath specified is valid
+     * @param filename a filename or file path leading to the correct file to parse and read
+     * @return int[][] returns a 2D array representing the block types
      */
     
     public static int[][] parsefile(String filename) throws Exception {
@@ -404,8 +440,9 @@ public class game extends Application {
     
     /**
      * @author blg19
-     * stop ball movement
-     *
+     * stop ball movement, assumes ball has been properly initialized
+     * @param None
+     * @return none
      */
     public void stop() {
     	myBouncer1.xVel = 0;
@@ -415,7 +452,9 @@ public class game extends Application {
     }
     /**
      * @author blg19
-     * loads the images used for end screen
+     * loads the images used for end screen, assumes P1END and P2END are valid
+     * @param None
+     * @return None
      *      *
      */
     public void CreateEnd() {
@@ -426,7 +465,9 @@ public class game extends Application {
     }
     /**
      * @author blg19
-     * win condition calculated in case of no blocks left
+     * win condition calculated in case of no blocks left, assumes existence of balls, root, and endscreen
+     * @param None
+     * @return None
      *
      */
     public void endgame() {
@@ -441,8 +482,9 @@ public class game extends Application {
     }
     /**
      * @author blg19
-     * win condition for player 1
-     *
+     * win condition for player 1, assumes same as endgame()
+     * @param None
+     * @return None
      */
     public void p1wins() {
     	CreateEnd();
@@ -453,8 +495,9 @@ public class game extends Application {
     
     /**
      * @author blg19
-     * win condition for player 2
-     *
+     * win condition for player 2, assumes same as endgame()
+     *@param None
+     *@return None
      */
     public void p2wins() {
     	CreateEnd();

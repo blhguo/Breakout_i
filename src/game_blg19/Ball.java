@@ -7,6 +7,7 @@ import javafx.scene.shape.Circle;
 /**
  * @author blg19
  *This class extends the javafx class "circle", adding parameters like x-velocity, y-velocity, and score, as well as methods to alter these parameters
+ * No dependencies (except on the native class Circle
  */
 public class Ball extends Circle {
 	public int xVel;
@@ -18,6 +19,8 @@ public class Ball extends Circle {
 		this.yVel = yVelocity;
 		this.score = points;
 	}
+	
+	
 	public void ChangeXVel(int accel) {
 		this.xVel = this.xVel + accel;
 	}

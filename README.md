@@ -2,6 +2,19 @@ game
 ====
 
 First project for CompSci 308 Fall 2017
+
+Worked on by Brandon Guo
+
+Started 1/16, ended 1/19
+
+Resources include primarily TA office hours and StackOverflow
+
+"game.java" is the only class containing main
+
+Files used to test the project were all variations of "Level1.txt"
+
+Requires input file that is a space-separated 7x7 square matrix of integers between 1 and 7, with at most one instance of "6"
+
 Extra effects
 
 Direction switch: Both player's controls are reversed
